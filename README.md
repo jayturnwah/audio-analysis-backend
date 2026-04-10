@@ -1,5 +1,28 @@
 # Audio Analysis Backend
 
+## Example API Usage
+
+### Get all beats
+
+GET /beats
+
+### Filter beats by BPM and energy
+
+GET /beats?bpm=120&energy=high
+
+### Example Response
+
+```json
+[
+  {
+    "title": "Midnight Drift",
+    "bpm": 120,
+    "key": "C Minor",
+    "energy": "high",
+    "tags": ["dark", "trap", "cinematic"]
+  }
+]
+
 A FastAPI backend for analyzing, tagging, and cataloging audio files using PostgreSQL.
 
 This project was built to process a large library of instrumentals, extract useful metadata, and make the catalog searchable through API endpoints and a marketplace-style interface.
@@ -43,3 +66,18 @@ audio-analysis-backend/
 ├── uploads/
 ├── requirements.txt
 └── .env.example
+
+
+## Architecture
+
+- Routers handle API endpoints
+- Services contain business logic for audio processing
+- Models define database structure
+- Scripts handle batch processing and data ingestion
+
+This separation allows the system to scale and remain maintainable.
+
+```markdown id="zbo0yh"
+## Preview
+
+![Marketplace Preview](./static/preview.png)
