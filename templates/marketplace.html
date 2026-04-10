@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lucky_Loser1000 Marketplace</title>
+
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #eaeaea;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .hero {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 50%;
+            left: 40px;
+            transform: translateY(-50%);
+        }
+
+        .hero-overlay h1 {
+            font-size: 38px;
+            margin: 0;
+        }
+
+        .hero-overlay p {
+            color: #aaa;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 40px;
+        }
+
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .control-bar input,
+        .control-bar select,
+        .control-bar button {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #111;
+            color: #eee;
+        }
+
+        .control-bar a {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #111;
+            color: #eee;
+            text-decoration: none;
+        }
+
+        .control-bar button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-bar button:hover {
+            background: #242424;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .control-bar button:active {
+            transform: scale(0.98);
+        }
+
+        .beat-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            transition: all 0.2s ease;
+        }
+
+        .beat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            border-color: #444;
+        }
+
+        .beat-title {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .beat-card.playing,
+        .featured-card.playing {
+            border-color: #666;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75)
+        }
+
+        .now-playing {
+            display: none;
+            font-size: 11px;
+            color: #fff;
+            background: #2a2a2a;
+            border: 1px solid #555;
+            border-radius: 999px;
+            padding: 4px 8px;
+            margin-bottom: 10px;
+            width: fit-content;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .beat-card.playing .now-playing,
+        .featured-card.playing .now-playing {
+            display: inline-block;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin: 30px 0 15px;
+        }
+
+        .featured-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .featured-card {
+            min-width: 260px;
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
+            flex-shrink: 0;
+        }
+
+        .favorite-btn {
+            margin-top: 8px;
+            margin-bottom: 10px;
+            padding: 6px 10px;
+            border: 1px solid #333;
+            border-radius: 999px;
+            background: #141414;
+            color: #ddd;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .favorite-btn:hover {
+            background: #1d1d1d;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .favorite-btn.saved {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .tag-group {
+            margin-top: 10px;
+        }
+
+        .tag-label {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+        }
+
+        .tag-values {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            margin: 4px 6px 0 0;
+            padding: 6px 10px;
+            border: 1px solid #333;
+            border-radius: 999px;
+            background: #141414;
+            color: #d6d6d6;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .tag-chip:hover {
+            background: #1d1d1d;
+            border-color: #555;
+            color: #fff;
+        }
+
+        .primary-tag {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            font-weight: 600;
+        }
+
+        .pagination {
+            margin-top: 30px;
+        }
+
+        .pagination a {
+            margin-right: 10px;
+            color: white;
+            text-decoration: none;
+            border: 1px solid #333;
+            padding: 6px 10px;
+            border-radius: 5px;
+        }
+
+        #sticky-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #0f0f0f;
+            border-top: 1px solid #2a2a2a;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            z-index: 9999;
+        }
+
+        #sticky-track {
+            color: #eaeaea;
+            font-size: 13px;
+            letter-spacing: 0.4px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hero">
+        <img src="/static/hero.png" alt="Hero">
+        <div class="hero-overlay">
+            <h1>Lucky_Loser1000</h1>
+            <p>Instrumentals for individuals in a different mindstate.</p>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <form method="get" action="/marketplace" class="control-bar">
+            <input type="text" name="search" placeholder="Search..." value="{{ search }}">
+
+            <select name="energy">
+                <option value="All Energy" {% if energy=="All Energy" %}selected{% endif %}>All Energy</option>
+                <option value="low" {% if energy=="low" %}selected{% endif %}>low</option>
+                <option value="medium" {% if energy=="medium" %}selected{% endif %}>medium</option>
+                <option value="high" {% if energy=="high" %}selected{% endif %}>high</option>
+            </select>
+
+            <select name="bpm_range">
+                <option value="All BPM" {% if bpm_range=="All BPM" %}selected{% endif %}>All BPM</option>
+                <option value="90-110" {% if bpm_range=="90-110" %}selected{% endif %}>90-110</option>
+                <option value="111-130" {% if bpm_range=="111-130" %}selected{% endif %}>111-130</option>
+                <option value="131-150" {% if bpm_range=="131-150" %}selected{% endif %}>131-150</option>
+                <option value="151+" {% if bpm_range=="151+" %}selected{% endif %}>151+</option>
+            </select>
+
+            <select name="vibe">
+                <option value="All Vibes" {% if vibe=="All Vibes" %}selected{% endif %}>All Vibes</option>
+                <option value="dark" {% if vibe=="dark" %}selected{% endif %}>dark</option>
+                <option value="aggressive" {% if vibe=="aggressive" %}selected{% endif %}>aggressive</option>
+                <option value="cinematic" {% if vibe=="cinematic" %}selected{% endif %}>cinematic</option>
+                <option value="uplifting" {% if vibe=="uplifting" %}selected{% endif %}>uplifting</option>
+            </select>
+
+            <select name="sort">
+                <option value="newest" {% if sort=="newest" %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if sort=="oldest" %}selected{% endif %}>Oldest</option>
+                <option value="bpm_high" {% if sort=="bpm_high" %}selected{% endif %}>Highest BPM</option>
+                <option value="bpm_low" {% if sort=="bpm_low" %}selected{% endif %}>Lowest BPM</option>
+                <option value="energy_high" {% if sort=="energy_high" %}selected{% endif %}>Highest Energy</option>
+            </select>
+
+            <button type="submit">Search</button>
+            <a href="/marketplace">Reset Filters</a>
+        </form>
+
+        {% if featured_beats %}
+        <div class="section-title">Featured Picks</div>
+
+        <div class="featured-scroll">
+            {% for beat in featured_beats %}
+            <div class="featured-card">
+                <div class="beat-title">{{ beat.title }}</div>
+                <div class="meta">{{ beat.bpm }} BPM | {{ beat.musical_key }}</div>
+
+                <div class="tag-group">
+                    <div class="tag-label">Energy</div>
+                    <div class="tag-values">
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ beat.energy_label | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                            class="tag-chip">
+                            {{ beat.energy_label }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tag-group">
+                    <div class="tag-label">Tempo</div>
+                    <div class="tag-values">
+                        {% if beat.bpm >= 151 %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=151%2B&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                            class="tag-chip">{{ beat.bpm }} BPM</a>
+                        {% elif beat.bpm >= 131 %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=131-150&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                            class="tag-chip">{{ beat.bpm }} BPM</a>
+                        {% elif beat.bpm >= 111 %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=111-130&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                            class="tag-chip">{{ beat.bpm }} BPM</a>
+                        {% else %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=90-110&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                            class="tag-chip">{{ beat.bpm }} BPM</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="tag-group">
+                    <div class="tag-label">Vibe Profile</div>
+                    <div class="tag-values">
+                        {% for tag in beat.mood_tags.split(", ") %}
+                        {% if tag %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}&mood_tag={{ tag | urlencode }}"
+                            class="tag-chip {% if loop.first %}primary-tag{% endif %}">{{ tag }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="tag-group">
+                    <div class="tag-label">Artist Lane</div>
+                    <div class="tag-values">
+                        {% for tag in beat.artist_reference_tags.split(", ") %}
+                        {% if tag %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&sync_target={{ sync_target | urlencode }}&artist_ref={{ tag | urlencode }}"
+                            class="tag-chip">{{ tag }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="tag-group">
+                    <div class="tag-label">Use Case</div>
+                    <div class="tag-values">
+                        {% for tag in beat.sync_target_tags.split(", ") %}
+                        {% if tag %}
+                        <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ tag | urlencode }}"
+                            class="tag-chip">{{ tag }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <audio controls>
+                    <source src="{{ beat.preview_url }}" type="audio/wav">
+                </audio>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="section-title">Full Archive</div>
+
+        {% for beat in beats %}
+        <div class="beat-card">
+            <div class="beat-title">{{ beat.title }}</div>
+            <button class="favorite-btn" data-beat="{{ beat.title }}">♡ Save</button>
+            <div class="now-playing">Now Playing</div>
+
+            <div class="meta">
+                {{ beat.bpm }} BPM | {{ beat.musical_key }} | {{ beat.energy_label }}
+            </div>
+
+            <div class="tag-group">
+                <div class="tag-label">Energy</div>
+                <div class="tag-values">
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ beat.energy_label | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                        class="tag-chip">
+                        {{ beat.energy_label }}
+                    </a>
+                </div>
+            </div>
+
+            <div class="tag-group">
+                <div class="tag-label">Tempo</div>
+                <div class="tag-values">
+                    {% if beat.bpm >= 151 %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=151%2B&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                        class="tag-chip">{{ beat.bpm }} BPM</a>
+                    {% elif beat.bpm >= 131 %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=131-150&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                        class="tag-chip">{{ beat.bpm }} BPM</a>
+                    {% elif beat.bpm >= 111 %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=111-130&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                        class="tag-chip">{{ beat.bpm }} BPM</a>
+                    {% else %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range=90-110&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}"
+                        class="tag-chip">{{ beat.bpm }} BPM</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tag-group">
+                <div class="tag-label">Vibe Profile</div>
+                <div class="tag-values">
+                    {% for tag in beat.mood_tags.split(", ") %}
+                    {% if tag %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ sync_target | urlencode }}&mood_tag={{ tag | urlencode }}"
+                        class="tag-chip {% if loop.first %}primary-tag{% endif %}">{{ tag }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tag-group">
+                <div class="tag-label">Artist Lane</div>
+                <div class="tag-values">
+                    {% for tag in beat.artist_reference_tags.split(", ") %}
+                    {% if tag %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&sync_target={{ sync_target | urlencode }}&artist_ref={{ tag | urlencode }}"
+                        class="tag-chip">{{ tag }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tag-group">
+                <div class="tag-label">Use Case</div>
+                <div class="tag-values">
+                    {% for tag in beat.sync_target_tags.split(", ") %}
+                    {% if tag %}
+                    <a href="/marketplace?search={{ search | urlencode }}&energy={{ energy | urlencode }}&bpm_range={{ bpm_range | urlencode }}&vibe={{ vibe | urlencode }}&sort={{ sort | urlencode }}&mood_tag={{ mood_tag | urlencode }}&artist_ref={{ artist_ref | urlencode }}&sync_target={{ tag | urlencode }}"
+                        class="tag-chip">{{ tag }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <audio controls>
+                <source src="{{ beat.preview_url }}" type="audio/wav">
+            </audio>
+        </div>
+        {% endfor %}
+
+        <div class="pagination">
+            {% if page > 1 %}
+            <a
+                href="/marketplace?page={{ page - 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">←
+                Prev</a>
+            {% endif %}
+            <a
+                href="/marketplace?page={{ page + 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">Next
+                →</a>
+        </div>
+
+    </div>
+
+    <!-- 🔥 STICKY PLAYER -->
+    <div id="sticky-player">
+        <div id="sticky-track">No beat playing</div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const players = Array.from(document.querySelectorAll("audio"));
+            const stickyTrack = document.getElementById("sticky-track");
+
+            players.forEach((player, index) => {
+
+                player.addEventListener("play", () => {
+                    players.forEach(other => {
+                        const otherCard = other.closest(".beat-card");
+
+                        if (other !== player) {
+                            other.pause();
+                            other.currentTime = 0;
+                            if (otherCard) otherCard.classList.remove("playing");
+                        }
+                    });
+
+                    const currentCard = player.closest(".beat-card");
+                    if (currentCard) currentCard.classList.add("playing");
+
+                    const title = currentCard?.querySelector(".beat-title")?.textContent;
+                    if (stickyTrack && title) {
+                        stickyTrack.textContent = "Now Playing: " + title;
+                    }
+                });
+
+                player.addEventListener("ended", () => {
+                    const currentCard = player.closest(".beat-card");
+                    if (currentCard) currentCard.classList.remove("playing");
+
+                    const next = players[index + 1];
+
+                    if (next) {
+                        next.play();
+                    } else {
+                        stickyTrack.textContent = "No beat playing";
+                    }
+                });
+
+                player.addEventListener("pause", () => {
+                    const currentCard = player.closest(".beat-card, .featured-card");
+                    const titleEl = currentCard?.querySelector(".beat-title");
+
+                    if (stickyTrack && titleEl && !player.ended) {
+                        stickyTrack.textContent = `Paused: ${titleEl.textContent}`;
+                    }
+                });
+
+                const favoriteButtons = document.querySelectorAll(".favorite-btn");
+
+                // load saved beats from localStorage
+                let savedBeats = JSON.parse(localStorage.getItem("favorites")) || [];
+
+                favoriteButtons.forEach(button => {
+                    const beatTitle = button.dataset.beat;
+
+                    // initialize state on page load
+                    if (savedBeats.includes(beatTitle)) {
+                        button.classList.add("saved");
+                        button.textContent = "♥ Saved";
+                    }
+
+                    button.addEventListener("click", () => {
+                        if (savedBeats.includes(beatTitle)) {
+                            // remove
+                            savedBeats = savedBeats.filter(b => b !== beatTitle);
+                            button.classList.remove("saved");
+                            button.textContent = "♡ Save";
+                        } else {
+                            // add
+                            savedBeats.push(beatTitle);
+                            button.classList.add("saved");
+                            button.textContent = "♥ Saved";
+                        }
+
+                        // store updated list
+                        localStorage.setItem("favorites", JSON.stringify(savedBeats));
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
+⚠️ IMPORTANT
