@@ -12,7 +12,7 @@ GET /beats?bpm=120&energy=high
 
 ### Example Response
 
-```json
+
 [
   {
     "title": "Midnight Drift",
@@ -48,7 +48,7 @@ This project was built to process a large library of instrumentals, extract usef
 
 ## Project Structure
 
-```bash
+
 audio-analysis-backend/
 ├── app/
 │   ├── main.py
@@ -77,7 +77,3 @@ audio-analysis-backend/
 
 This separation allows the system to scale and remain maintainable.
 
-```markdown id="zbo0yh"
-## Preview
-
-![Marketplace Preview](./static/preview.png)
