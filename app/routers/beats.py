@@ -12,17 +12,17 @@ from app.models import Beat, AccessRequest, Release
 from app.schemas import BeatCreate, BeatResponse
 
 import os
-import stripe
+#import stripe
 from fastapi import HTTPException
 from pydantic import BaseModel
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from fastapi.responses import JSONResponse, RedirectResponse
 
 
 
-load_dotenv()
+#load_dotenv()
 
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+#stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 templates = Jinja2Templates(directory="templates")
 
@@ -350,8 +350,8 @@ def create_access_request(
 class CheckoutRequest(BaseModel):
     tier: str
 
-@router.post("/create-checkout-session")
-def create_checkout_session(payload: CheckoutRequest):
+#@router.post("/create-checkout-session")
+"""def create_checkout_session(payload: CheckoutRequest):
     print("PAYLOAD TIER:", payload.tier)
     price_map = {
     "creator": os.getenv("STRIPE_CREATOR_PRICE_ID"),
@@ -380,7 +380,7 @@ def create_checkout_session(payload: CheckoutRequest):
         return {"url": checkout_session.url}
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))"""
 
 @router.patch("/beats/publish-all")
 def publish_all_beats(db: Session = Depends(get_db)):
