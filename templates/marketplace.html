@@ -194,6 +194,8 @@
             border-color: #fff;
         }
 
+
+
         .tag-group {
             margin-top: 10px;
         }
@@ -238,6 +240,15 @@
             font-weight: 600;
         }
 
+        .current-page {
+            margin-right: 10px;
+            color: #000;
+            background: #fff;
+            border: 1px solid #fff;
+            padding: 6px 10px;
+            border-radius: 5px;
+        }
+
         .pagination {
             margin-top: 30px;
         }
@@ -249,6 +260,69 @@
             border: 1px solid #333;
             padding: 6px 10px;
             border-radius: 5px;
+        }
+
+        #favorites-cart {
+            position: fixed;
+            right: 20px;
+            bottom: 60px;
+            width: 320px;
+            max-height: 420px;
+            overflow-y: auto;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 14px;
+            z-index: 9998;
+            display: none;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #close-cart {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .cart-item {
+            border-bottom: 1px solid #222;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .cart-item {
+            border-bottom: 1px solid #222;
+            padding: 10px 0;
+            font-size: 13px;
+        }
+
+        .cart-play-btn {
+            margin-top: 6px;
+            padding: 5px 9px;
+            border: 1px solid #333;
+            border-radius: 999px;
+            background: #141414;
+            color: #ddd;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cart-play-btn:hover {
+            background: #1d1d1d;
+            color: #fff;
+        }
+
+        .cart-remove-btn {
+            background: #2a0000;
+            border-color: #500;
         }
 
         #sticky-player {
@@ -268,7 +342,130 @@
             font-size: 13px;
             letter-spacing: 0.4px
         }
+
+
+        #locked-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+
+        .locked-modal-content {
+            background: #111;
+            border: 1px solid #333;
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        .locked-modal-content h2 {
+            margin-bottom: 14px;
+        }
+
+        .locked-modal-content p {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .locked-modal-content button {
+            margin: 6px;
+            padding: 10px 16px;
+            border: 1px solid #444;
+            background: #181818;
+            color: white;
+            cursor: pointer;
+        }
+
+        #access-form input,
+        #access-form select,
+        #access-form textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #0b0b0b;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        #access-form textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .download-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            background: #161616;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: #222;
+        }
+
+        #access-form input,
+        #access-form select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #0b0b0b;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .tier-card {
+            border: 1px solid #2a2a2a;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            text-align: left;
+            background: #141414;
+        }
+
+        .tier-card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .tier-card p {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .tier-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            background: #1c1c1c;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .tier-btn:hover {
+            background: #262626;
+        }
+
+        .black-archive {
+            border-color: #555;
+            background: #0f0f0f;
+        }
     </style>
+
 </head>
 
 <body>
@@ -318,7 +515,18 @@
             </select>
 
             <button type="submit">Search</button>
-            <a href="/marketplace">Reset Filters</a>
+            <button type="button" onclick="window.location.href='/marketplace'">
+                Reset Filters
+            </button>
+
+            <button type="button" id="open-cart">Favorites Cart</button> <!-- 🔥 FAVORITES BUTTON -->
+            <button type="button" id="hook-mode">Hook Mode</button>
+
+
+
+
+
+
         </form>
 
         {% if featured_beats %}
@@ -395,9 +603,13 @@
                     </div>
                 </div>
 
-                <audio controls>
+                <audio controls controlsList="nodownload" data-hook="{{ beat.hook_start_seconds }}">
                     <source src="{{ beat.preview_url }}" type="audio/wav">
                 </audio>
+
+                <button class="download-btn">
+                    Download WAV
+                </button>
             </div>
             {% endfor %}
         </div>
@@ -408,7 +620,7 @@
         {% for beat in beats %}
         <div class="beat-card">
             <div class="beat-title">{{ beat.title }}</div>
-            <button class="favorite-btn" data-beat="{{ beat.title }}">♡ Save</button>
+            <button class="favorite-btn" data-id="{{ beat.id }}">♡ Save</button>
             <div class="now-playing">Now Playing</div>
 
             <div class="meta">
@@ -480,23 +692,50 @@
                 </div>
             </div>
 
-            <audio controls>
+            <audio controls controlsList="nodownload" data-hook="{{ beat.hook_start_seconds }}">
                 <source src="{{ beat.preview_url }}" type="audio/wav">
             </audio>
+            <button class="download-btn">
+                Download
+            </button>
         </div>
+
         {% endfor %}
 
         <div class="pagination">
             {% if page > 1 %}
             <a
-                href="/marketplace?page={{ page - 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">←
-                Prev</a>
+                href="/marketplace?page={{ page - 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">
+                ← Prev
+            </a>
             {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+            <span class="current-page">{{ p }}</span>
+            {% else %}
             <a
-                href="/marketplace?page={{ page + 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">Next
-                →</a>
+                href="/marketplace?page={{ p }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">
+                {{ p }}
+            </a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %} <a
+                href="/marketplace?page={{ page + 1 }}&search={{ search }}&energy={{ energy }}&bpm_range={{ bpm_range }}&vibe={{ vibe }}&sort={{ sort }}&mood_tag={{ mood_tag }}&artist_ref={{ artist_ref }}&sync_target={{ sync_target }}">
+                Next →
+                </a>
+                {% endif %}
         </div>
 
+    </div>
+
+    <div id="favorites-cart">
+        <div class="cart-header">
+            <strong>Favorites Cart</strong>
+            <button type="button" id="close-cart">×</button>
+        </div>
+        <div id="cart-items"></div>
     </div>
 
     <!-- 🔥 STICKY PLAYER -->
@@ -504,88 +743,407 @@
         <div id="sticky-track">No beat playing</div>
     </div>
 
+    <div id="locked-modal">
+        <div class="locked-modal-content">
+
+            <h2>Archive Access</h2>
+
+            <p>
+                Private production archive for artists, labels, managers, A&Rs, and sync representatives.
+            </p>
+
+            <div id="access-options">
+                <div class="tier-card">
+                    <h3>Request Access</h3>
+
+                    <p>
+                        Applications are reviewed manually.
+                    </p>
+
+                    <button id="request-access-btn" type="button">
+                        Request Access
+                    </button>
+                </div>
+
+                <div class="tier-card black-archive">
+                    <h3>Immediate Archive Access</h3>
+
+                    <p>
+                        $10,000/year
+                    </p>
+
+                    <p>
+                        Full archive access and download privileges.
+                    </p>
+
+                    <p>
+                        No exclusive ownership rights are included.
+                    </p>
+
+                    <button id="purchase-access-btn" type="button">
+                        Purchase Access
+                    </button>
+                </div>
+            </div>
+
+            <form id="access-form" style="display: none;">
+                <input type="text" id="access-name" placeholder="Name" required>
+
+                <input type="email" id="access-email" placeholder="Email" required>
+
+                <input type="text" id="access-artist" placeholder="Artist Name">
+
+                <input type="text" id="access-spotify" placeholder="Spotify Link">
+
+                <input type="text" id="access-instagram" placeholder="Instagram Link">
+
+                <textarea id="access-message" placeholder="What are you currently working on?"></textarea>
+
+                <button type="submit">
+                    Submit Application
+                </button>
+
+                <button type="button" id="back-to-access">
+                    Back
+                </button>
+            </form>
+
+            <div id="access-success" style="display: none;">
+                <p>
+                    Application received. Access is reviewed manually.
+                </p>
+
+                <button type="button" id="close-success">
+                    Close
+                </button>
+            </div>
+
+            <button id="close-modal-btn" type="button">
+                Close
+            </button>
+
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const players = Array.from(document.querySelectorAll("audio"));
+
+            // ---------------- AUDIO SYSTEM ----------------
+
+            let hookModeOn = false;
+
+            const hookBtn = document.getElementById("hook-mode");
             const stickyTrack = document.getElementById("sticky-track");
 
-            players.forEach((player, index) => {
+            if (hookBtn) {
+                hookBtn.addEventListener("click", () => {
+                    hookModeOn = !hookModeOn;
 
-                player.addEventListener("play", () => {
-                    players.forEach(other => {
-                        const otherCard = other.closest(".beat-card");
+                    hookBtn.textContent = hookModeOn
+                        ? "Hook Mode ON"
+                        : "Hook Mode";
+                });
+            }
 
-                        if (other !== player) {
-                            other.pause();
-                            other.currentTime = 0;
-                            if (otherCard) otherCard.classList.remove("playing");
+            function stopOtherPlayers(activePlayer) {
+                const allPlayers = Array.from(document.querySelectorAll("audio"));
+
+                allPlayers.forEach(other => {
+                    if (other !== activePlayer) {
+                        other.pause();
+                        other.currentTime = 0;
+
+                        const otherCard = other.closest(".beat-card, .featured-card");
+                        if (otherCard) {
+                            otherCard.classList.remove("playing");
                         }
-                    });
+                    }
+                });
+            }
 
-                    const currentCard = player.closest(".beat-card");
-                    if (currentCard) currentCard.classList.add("playing");
+            document.addEventListener("play", (event) => {
+                if (event.target.tagName.toLowerCase() !== "audio") return;
 
-                    const title = currentCard?.querySelector(".beat-title")?.textContent;
+                const player = event.target;
+
+                const hookStart = parseInt(player.dataset.hook);
+
+                if (hookModeOn && hookStart && player.currentTime < 5) {
+                    player.currentTime = hookStart;
+                }
+
+                stopOtherPlayers(player);
+
+                const currentCard = player.closest(".beat-card, .featured-card");
+
+                if (currentCard) {
+                    currentCard.classList.add("playing");
+
+                    const title = currentCard.querySelector(".beat-title")?.textContent;
+
                     if (stickyTrack && title) {
                         stickyTrack.textContent = "Now Playing: " + title;
                     }
-                });
+                }
+            }, true);
 
-                player.addEventListener("ended", () => {
-                    const currentCard = player.closest(".beat-card");
-                    if (currentCard) currentCard.classList.remove("playing");
+            document.addEventListener("pause", (event) => {
+                if (event.target.tagName.toLowerCase() !== "audio") return;
 
-                    const next = players[index + 1];
+                const player = event.target;
+                const currentCard = player.closest(".beat-card, .featured-card");
+                const titleEl = currentCard?.querySelector(".beat-title");
 
-                    if (next) {
-                        next.play();
+                if (stickyTrack && titleEl && !player.ended) {
+                    stickyTrack.textContent = `Paused: ${titleEl.textContent}`;
+                }
+            }, true);
+
+            document.addEventListener("ended", (event) => {
+                if (event.target.tagName.toLowerCase() !== "audio") return;
+
+                const player = event.target;
+                const currentCard = player.closest(".beat-card, .featured-card");
+
+                if (currentCard) {
+                    currentCard.classList.remove("playing");
+                }
+
+                const pagePlayers = Array.from(document.querySelectorAll(".beat-card audio, .featured-card audio"));
+                const index = pagePlayers.indexOf(player);
+                const next = pagePlayers[index + 1];
+
+                if (next) {
+                    next.play();
+                } else if (stickyTrack) {
+                    stickyTrack.textContent = "No beat playing";
+                }
+            }, true);
+
+            // ---------------- FAVORITES SYSTEM ----------------
+            const favoriteButtons = document.querySelectorAll(".favorite-btn");
+            let savedBeats = JSON.parse(localStorage.getItem("favorites")) || [];
+
+            const favCountEl = document.getElementById("fav-count");
+
+            function updateFavCount() {
+                if (favCountEl) {
+                    favCountEl.textContent = savedBeats.length;
+                }
+            }
+
+            // run on load
+            updateFavCount();
+            favoriteButtons.forEach(button => {
+                const beatId = button.dataset.id;
+                const beatTitle = button.closest(".beat-card")
+                    .querySelector(".beat-title").textContent;
+                const audio = button.closest(".beat-card").querySelector("audio");
+                const previewUrl = audio.querySelector("source").src;
+
+
+                // initialize saved state
+                if (savedBeats.some(b => b.id === beatId)) {
+                    button.classList.add("saved");
+                    button.textContent = "♥ Saved";
+                }
+
+                button.addEventListener("click", () => {
+
+                    const alreadySaved = savedBeats.some(b => b.id === beatId);
+
+                    if (alreadySaved) {
+                        savedBeats = savedBeats.filter(b => b.id !== beatId);
+                        button.classList.remove("saved");
+                        button.textContent = "♡ Save";
                     } else {
-                        stickyTrack.textContent = "No beat playing";
-                    }
-                });
-
-                player.addEventListener("pause", () => {
-                    const currentCard = player.closest(".beat-card, .featured-card");
-                    const titleEl = currentCard?.querySelector(".beat-title");
-
-                    if (stickyTrack && titleEl && !player.ended) {
-                        stickyTrack.textContent = `Paused: ${titleEl.textContent}`;
-                    }
-                });
-
-                const favoriteButtons = document.querySelectorAll(".favorite-btn");
-
-                // load saved beats from localStorage
-                let savedBeats = JSON.parse(localStorage.getItem("favorites")) || [];
-
-                favoriteButtons.forEach(button => {
-                    const beatTitle = button.dataset.beat;
-
-                    // initialize state on page load
-                    if (savedBeats.includes(beatTitle)) {
+                        savedBeats.push({
+                            id: beatId,
+                            title: beatTitle,
+                            preview_url: previewUrl
+                        });
                         button.classList.add("saved");
                         button.textContent = "♥ Saved";
                     }
 
-                    button.addEventListener("click", () => {
-                        if (savedBeats.includes(beatTitle)) {
-                            // remove
-                            savedBeats = savedBeats.filter(b => b !== beatTitle);
-                            button.classList.remove("saved");
-                            button.textContent = "♡ Save";
-                        } else {
-                            // add
-                            savedBeats.push(beatTitle);
-                            button.classList.add("saved");
-                            button.textContent = "♥ Saved";
-                        }
-
-                        // store updated list
-                        localStorage.setItem("favorites", JSON.stringify(savedBeats));
-                    });
+                    localStorage.setItem("favorites", JSON.stringify(savedBeats));
                 });
             });
+
+
+
+            // ---------------- FAVORITES CART ----------------
+
+            const cart = document.getElementById("favorites-cart");
+            const openCartBtn = document.getElementById("open-cart");
+            const cartItems = document.getElementById("cart-items");
+            const closeCart = document.getElementById("close-cart");
+
+            function renderFavoritesCart() {
+                if (!cartItems) return;
+
+                cartItems.innerHTML = "";
+
+                if (savedBeats.length === 0) {
+                    cartItems.innerHTML = "<div class='cart-item'>No favorites saved yet.</div>";
+                    return;
+                }
+
+                savedBeats.forEach(beat => {
+                    const item = document.createElement("div");
+                    item.className = "cart-item";
+
+                    const titleEl = document.createElement("div");
+                    titleEl.textContent = beat.title;
+
+                    // 🔥 MINI PLAYER
+                    const audioEl = document.createElement("audio");
+                    audioEl.controls = true;
+                    audioEl.src = beat.preview_url;
+
+                    // 🔥 REMOVE BUTTON
+                    const removeBtn = document.createElement("button");
+                    removeBtn.className = "cart-play-btn cart-remove-btn";
+                    removeBtn.textContent = "Remove";
+                    removeBtn.style.marginLeft = "8px";
+
+                    removeBtn.addEventListener("click", () => {
+                        savedBeats = savedBeats.filter(b => b.id !== beat.id);
+                        localStorage.setItem("favorites", JSON.stringify(savedBeats));
+
+                        const matchingBtn = document.querySelector(`.favorite-btn[data-id="${beat.id}"]`);
+                        if (matchingBtn) {
+                            matchingBtn.classList.remove("saved");
+                            matchingBtn.textContent = "♡ Save";
+                        }
+
+                        renderFavoritesCart();
+                    });
+
+                    item.appendChild(titleEl);
+                    item.appendChild(audioEl);
+                    item.appendChild(removeBtn);
+
+                    cartItems.appendChild(item);
+                });
+            }
+
+
+
+            // close cart
+            if (closeCart) {
+                closeCart.addEventListener("click", () => {
+                    cart.style.display = "none";
+                });
+            }
+
+            if (openCartBtn) {
+                openCartBtn.addEventListener("click", () => {
+                    renderFavoritesCart();
+                    cart.style.display = "block";
+                });
+            }
+
         });
+
+        // ---------------- LOCKED DOWNLOAD SYSTEM ----------------
+
+        const downloadButtons = document.querySelectorAll(".download-btn");
+
+        const lockedModal = document.getElementById("locked-modal");
+        const closeModalBtn = document.getElementById("close-modal-btn");
+
+        const requestAccessBtn = document.getElementById("request-access-btn");
+        const purchaseAccessBtn = document.getElementById("purchase-access-btn");
+        const accessOptions = document.getElementById("access-options");
+        const accessForm = document.getElementById("access-form");
+        const accessSuccess = document.getElementById("access-success");
+        const backToAccess = document.getElementById("back-to-access");
+        const closeSuccess = document.getElementById("close-success");
+
+        downloadButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                lockedModal.style.display = "flex";
+            });
+        });
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", () => {
+                lockedModal.style.display = "none";
+            });
+        }
+
+        if (requestAccessBtn) {
+            requestAccessBtn.addEventListener("click", () => {
+                accessOptions.style.display = "none";
+                accessForm.style.display = "block";
+            });
+        }
+
+        if (backToAccess) {
+            backToAccess.addEventListener("click", () => {
+                accessForm.style.display = "none";
+                accessOptions.style.display = "block";
+            });
+        }
+
+        if (accessForm) {
+            accessForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const payload = {
+                    name: document.getElementById("access-name").value,
+                    email: document.getElementById("access-email").value,
+                    artist_name: document.getElementById("access-artist").value,
+                    spotify_link: document.getElementById("access-spotify").value,
+                    instagram_link: document.getElementById("access-instagram").value,
+                    message: document.getElementById("access-message").value
+                };
+
+                try {
+                    const response = await fetch("/access-request", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === "success") {
+                        accessForm.style.display = "none";
+                        accessSuccess.style.display = "block";
+                    } else {
+                        alert("Application could not be submitted.");
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Application could not be submitted.");
+                }
+            });
+        }
+
+        if (closeSuccess) {
+            closeSuccess.addEventListener("click", () => {
+                lockedModal.style.display = "none";
+                accessSuccess.style.display = "none";
+                accessOptions.style.display = "block";
+            });
+        }
+
+        if (purchaseAccessBtn) {
+            purchaseAccessBtn.addEventListener("click", () => {
+                alert("Immediate Archive Access is $10,000/year. Checkout will be enabled after approval of final terms.");
+            });
+        }
+
+
+
+
+
+
     </script>
 
 </body>

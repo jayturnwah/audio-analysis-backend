@@ -207,6 +207,38 @@ def infer_genre_from_folder(folder_name: str):
     return "Unknown"
 
 
+def detect_hook_start(file_path: str) -> int:
+    try:
+        y, sr = librosa.load(file_path, sr=None, mono=True)
+
+        if y is None or len(y) == 0:
+            return 30
+
+        rms = librosa.feature.rms(y=y)[0]
+
+        frame_times = librosa.frames_to_time(
+            range(len(rms)),
+            sr=sr
+        )
+
+        threshold = np.percentile(rms, 75)
+
+        for i, energy in enumerate(rms):
+            time = frame_times[i]
+
+            if time < 25:
+                continue
+
+            if energy >= threshold:
+                return int(time)
+
+        return 30
+
+    except Exception as e:
+        print(f"Hook detection error for {file_path}: {e}")
+        return 30
+
+
 def analyze_energy(file_path: str):
     try:
         y, sr = librosa.load(file_path, sr=None, mono=True)
@@ -273,6 +305,7 @@ def import_beats():
             genre = infer_genre_from_folder(source_folder)
             duration_seconds = get_duration_seconds(str(file_path))
             energy_score, energy_label = analyze_energy(str(file_path))
+            hook_start_seconds = detect_hook_start(str(file_path))
             ai_tags = generate_ai_semantic_tags(str(file_path), final_bpm, energy_label)
             ai_mood_tags = ai_tags["mood_tags"]
             ai_artist_tags = ai_tags["artist_reference_tags"]
@@ -327,7 +360,8 @@ def import_beats():
                 sync_target_tags=sync_target_tags,
                 is_public=0,
                 ai_tags=ai_mood_tags,
-                notes=None
+                notes=None,
+                hook_start_seconds=hook_start_seconds
             )
 
             db.add(new_beat)

@@ -1,17 +1,49 @@
 import shutil
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlalchemy.orm import Session
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from app.services.audio_analysis import analyze_single_file
 from app.database import get_db
-from app.models import Beat
+from app.models import Beat, AccessRequest, Release
 from app.schemas import BeatCreate, BeatResponse
 
+import os
+import stripe
+from fastapi import HTTPException
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from fastapi.responses import JSONResponse, RedirectResponse
+
+
+
+load_dotenv()
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
 templates = Jinja2Templates(directory="templates")
+
+class AccessRequestCreate(BaseModel):
+    name: str
+    email: str
+    artist_name: str | None = None
+    spotify_link: str | None = None
+    instagram_link: str | None = None
+    message: str | None = None
+
+class ReleaseCreate(BaseModel):
+    artist_name: str
+    email: str
+    beat_title: str
+    song_title: str
+    spotify_link: str
+    apple_music_link: str | None = None
+    youtube_link: str | None = None
+    release_date: str | None = None
+    notes: str | None = None
 
 
 def attach_preview_url(beat: Beat):
@@ -261,10 +293,13 @@ def marketplace_page(
     if artist_ref:
         query = query.filter(Beat.artist_reference_tags.ilike(f"%{artist_ref}%"))
 
-    page_size = 20
+    page_size = 10
     offset = (page - 1) * page_size
 
-    beats = query.order_by(Beat.id.desc()).offset(offset).limit(page_size).all()
+    total_beats = query.count()
+    total_pages = max(1, (total_beats + page_size - 1) // page_size)
+
+    beats = query.offset(offset).limit(page_size).all()
     beats = [attach_preview_url(beat) for beat in beats]
 
     return templates.TemplateResponse(
@@ -282,8 +317,70 @@ def marketplace_page(
             "mood_tag": mood_tag or "",
             "artist_ref": artist_ref or "",
             "sync_target": sync_target or "",
+            "total_pages": total_pages,
         }
     )
+
+@router.post("/access-request")
+def create_access_request(
+    payload: AccessRequestCreate,
+    db: Session = Depends(get_db)
+):
+    new_request = AccessRequest(
+        name=payload.name,
+        email=payload.email,
+        artist_name=payload.artist_name,
+        spotify_link=payload.spotify_link,
+        instagram_link=payload.instagram_link,
+        message=payload.message,
+        status="pending"
+    )
+
+    db.add(new_request)
+    db.commit()
+
+    return JSONResponse(
+        content={
+            "status": "success",
+            "message": "Access request received",
+            "id": int(new_request.id)
+        }
+    )
+
+class CheckoutRequest(BaseModel):
+    tier: str
+
+@router.post("/create-checkout-session")
+def create_checkout_session(payload: CheckoutRequest):
+    print("PAYLOAD TIER:", payload.tier)
+    price_map = {
+    "creator": os.getenv("STRIPE_CREATOR_PRICE_ID"),
+    "pro": os.getenv("STRIPE_PRO_PRICE_ID"),
+    "black_archive": os.getenv("STRIPE_BLACK_ARCHIVE_PRICE_ID"),
+    }
+
+    price_id = price_map.get(payload.tier)
+
+    if not price_id:
+        raise HTTPException(status_code=400, detail="Invalid subscription tier")
+    
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            mode="subscription",
+            line_items=[
+                {
+                    "price": price_id,
+                    "quantity": 1,
+                }
+            ],
+            success_url="http://127.0.0.1:8000/marketplace?checkout=success",
+            cancel_url="http://127.0.0.1:8000/marketplace?checkout=cancelled",
+        )
+
+        return {"url": checkout_session.url}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.patch("/beats/publish-all")
 def publish_all_beats(db: Session = Depends(get_db)):
@@ -319,5 +416,158 @@ def unfeature_beat(beat_id: int, db: Session = Depends(get_db)):
 
     return beat
 
+@router.get("/admin/access-requests")
+def access_requests_page(
+    request: Request,
+    status: str | None = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(AccessRequest)
 
+    if status and status != "all":
+        query = query.filter(AccessRequest.status == status)
+
+    requests = query.order_by(AccessRequest.created_at.desc()).all()
+
+    return templates.TemplateResponse(
+        "access_requests.html",
+        {
+            "request": request,
+            "requests": requests,
+            "status": status or "all"
+        }
+    )
+
+@router.post("/admin/access-requests/{request_id}/approve")
+def approve_access_request(
+    request_id: int,
+    db: Session = Depends(get_db)
+):
+    access_request = db.query(AccessRequest).filter(AccessRequest.id == request_id).first()
+
+    if not access_request:
+        raise HTTPException(status_code=404, detail="Access request not found")
     
+    access_request.status = "approved"
+    db.commit()
+
+    return RedirectResponse(
+        url="/admin/access-requests",
+        status_code=303
+    )
+
+@router.post("/admin/access-requests/{request_id}/reject")
+def reject_access_request(
+    request_id: int,
+    db: Session = Depends(get_db)
+):
+    access_request = db.query(AccessRequest).filter(AccessRequest.id == request_id).first()
+
+    if not access_request:
+        raise HTTPException(status_code=404, detail="Access request not found")
+    
+    access_request.status = "rejected"
+    db.commit()
+
+    return RedirectResponse(
+        url="/admin/access-requests",
+        status_code=303
+    )
+
+@router.post("/admin/access-requests/{request_id}/delete")
+def delete_access_request(
+    request_id: int,
+    db: Session = Depends(get_db)
+):
+    access_request = db.query(AccessRequest).filter(AccessRequest.id == request_id).first()
+
+    if not access_request:
+        raise HTTPException(status_code=404, detail="Access request not found")
+    
+    db.delete(access_request)
+    db.commit()
+
+    return RedirectResponse(
+        url="/admin/access-requests",
+        status_code=303
+    )
+
+@router.post("/release-report")
+def create_release_report(
+    payload: ReleaseCreate,
+    db: Session = Depends(get_db)
+):
+    new_release = Release(
+        artist_name=payload.artist_name,
+        email=payload.email,
+        beat_title=payload.beat_title,
+        song_title=payload.song_title,
+        spotify_link=payload.spotify_link,
+        apple_music_link=payload.apple_music_link,
+        youtube_link=payload.youtube_link,
+        release_date=payload.release_date,
+        notes=payload.notes
+    )
+
+    db.add(new_release)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": "Release report received"
+    }
+    
+@router.get("/admin/releases")
+def releases_page(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    releases = db.query(Release)\
+    .order_by(Release.created_at.desc())\
+    .all()
+
+    return templates.TemplateResponse(
+        "releases.html",
+        {
+            "request": request,
+            "releases": releases
+        }
+    )
+
+@router.get("/release-report-form")
+def release_report_form(
+    request: Request
+):
+    return templates.TemplateResponse(
+        "release_report_form.html",
+        {
+            "request": request
+        }
+    )
+
+@router.post("/admin/access-requests/{request_id}/notes")
+def save_access_request_notes(
+    request_id: int,
+    notes: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    access_request = (
+        db.query(AccessRequest)
+        .filter(AccessRequest.id == request_id)
+        .first()
+    )
+
+    if not access_request:
+        raise HTTPException(
+            status_code=404,
+            detail="Access request not found"
+        )
+
+    access_request.notes = notes
+
+    db.commit()
+
+    return RedirectResponse(
+        url="/admin/access-requests",
+        status_code=303
+    )

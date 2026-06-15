@@ -23,6 +23,7 @@ class BeatCreate(BaseModel):
     is_featured: int = 0
 
     notes: str | None = None
+    hook_start_seconds: int = 30
 
 
 class BeatResponse(BaseModel):
@@ -49,6 +50,7 @@ class BeatResponse(BaseModel):
     preview_url: str | None = None
 
     notes: str | None = None
+    hook_start_seconds: int = 30
 
     class Config:
         from_attributes = True
