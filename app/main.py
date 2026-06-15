@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-app.mount("/instrumentals", StaticFiles(directory="/Users/justinternois/Desktop/instrumentals"), name="instrumentals")
+#app.mount("/instrumentals", StaticFiles(directory="/Users/justinternois/Desktop/instrumentals"), name="instrumentals")
 app.include_router(beats_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
